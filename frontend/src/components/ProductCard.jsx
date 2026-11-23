@@ -1,5 +1,5 @@
 import { CalendarDays, MoreHorizontal, Package2 } from 'lucide-react';
-import { daysUntil, formatDate, getDaysLabel, getExpiryStatus } from '../utils/expiryUtils';
+import { formatDate, getDaysLabel, getProductDays, getProductStatus } from '../utils/expiryUtils';
 import ExpiryBadge from './ExpiryBadge';
 
 const categoryMark = {
@@ -10,9 +10,9 @@ const categoryMark = {
   Others: 'OTHER',
 };
 
-export default function ProductCard({ product, onEdit, onDelete, onDetails, view = 'grid' }) {
-  const days = daysUntil(product.expiryDate);
-  const status = getExpiryStatus(product.expiryDate);
+export default function ProductCard({ product, onEdit, onDelete, onConsume, onDetails, view = 'grid' }) {
+  const days = getProductDays(product);
+  const status = getProductStatus(product);
   const classColor = product.color || 'sand';
   if (view === 'list') {
     return (
@@ -26,7 +26,7 @@ export default function ProductCard({ product, onEdit, onDelete, onDetails, view
         <div className="hidden w-32 text-sm text-muted md:block">{formatDate(product.expiryDate)}</div>
         <div className="hidden w-28 text-sm text-ivory/80 lg:block">{getDaysLabel(days)}</div>
         <ExpiryBadge status={status} compact />
-        <ProductActions onEdit={() => onEdit(product)} onDelete={() => onDelete(product)} />
+        <ProductActions onEdit={() => onEdit(product)} onDelete={() => onDelete(product)} onConsume={() => onConsume(product)} />
       </div>
     );
   }
@@ -37,7 +37,7 @@ export default function ProductCard({ product, onEdit, onDelete, onDetails, view
         <span className="product-category-mark">{categoryMark[product.category] || 'OTHER'}</span>
         <span className="product-art-number">NO. {String(product.id).slice(-2).toUpperCase()}</span>
         <div className="product-art-shape"><Package2 size={27} strokeWidth={1.3} /></div>
-        <ProductActions onEdit={() => onEdit(product)} onDelete={() => onDelete(product)} />
+        <ProductActions onEdit={() => onEdit(product)} onDelete={() => onDelete(product)} onConsume={() => onConsume(product)} />
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
@@ -56,12 +56,13 @@ export default function ProductCard({ product, onEdit, onDelete, onDetails, view
   );
 }
 
-function ProductActions({ onEdit, onDelete }) {
+function ProductActions({ onEdit, onDelete, onConsume }) {
   return (
     <details className="product-actions">
       <summary aria-label="Product actions"><MoreHorizontal size={17} /></summary>
       <div className="product-action-menu">
         <button onClick={onEdit}>Edit item</button>
+        <button onClick={onConsume}>Mark consumed</button>
         <button onClick={onDelete} className="text-coral">Delete item</button>
       </div>
     </details>

@@ -1,20 +1,18 @@
 import { Bell, Menu, Plus, Search, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { daysUntil, getDaysLabel } from '../utils/expiryUtils';
 import { useInventory } from '../context/InventoryContext';
 import SearchBar from './SearchBar';
+import toast from 'react-hot-toast';
 
 export default function Navbar({ onMenu, onAdd }) {
-  const { profile, products, settings } = useInventory();
+  const { profile, settings, notifications, markNotificationRead, refreshNotifications } = useInventory();
   const [search, setSearch] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const alerts = (settings.reminders ? products : []).filter((product) => {
-    const days = daysUntil(product.expiryDate);
-    return days >= 0 && days <= 7;
-  }).sort((a, b) => daysUntil(a.expiryDate) - daysUntil(b.expiryDate));
+  const alerts = settings.reminders ? notifications : [];
+  const unreadCount = alerts.filter((item) => !item.readAt).length;
 
   useEffect(() => {
     const onKey = (event) => {
@@ -31,6 +29,16 @@ export default function Navbar({ onMenu, onAdd }) {
     event.preventDefault();
     navigate(`/inventory${search ? `?search=${encodeURIComponent(search)}` : ''}`);
   };
+  const toggleNotifications = async () => {
+    const opening = !notificationsOpen;
+    setNotificationsOpen(opening);
+    if (!opening) return;
+    try {
+      await refreshNotifications();
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <header className="topbar">
@@ -45,14 +53,22 @@ export default function Navbar({ onMenu, onAdd }) {
       <div className="flex items-center gap-2 sm:gap-3">
         <button className="icon-button md:hidden" onClick={() => navigate('/inventory')} aria-label="Search inventory"><Search size={18} /></button>
         <div className="relative">
-          <button className={`icon-button relative ${notificationsOpen ? 'icon-button-active' : ''}`} onClick={() => setNotificationsOpen(!notificationsOpen)} aria-label="Notifications">
+          <button className={`icon-button relative ${notificationsOpen ? 'icon-button-active' : ''}`} onClick={toggleNotifications} aria-label="Notifications">
             <Bell size={18} />
-            {alerts.length > 0 && <span className="notification-dot">{alerts.length}</span>}
+            {unreadCount > 0 && <span className="notification-dot">{unreadCount}</span>}
           </button>
           {notificationsOpen && <div className="notification-popover">
-            <div className="flex items-center justify-between border-b border-white/[.08] px-4 py-3"><div><p className="text-sm font-semibold">A little heads-up</p><p className="mt-0.5 text-[11px] text-muted">{alerts.length} items need your attention</p></div><button onClick={() => setNotificationsOpen(false)} aria-label="Close notifications"><X size={15} /></button></div>
+            <div className="flex items-center justify-between border-b border-white/[.08] px-4 py-3"><div><p className="text-sm font-semibold">A little heads-up</p><p className="mt-0.5 text-[11px] text-muted">{unreadCount} unread reminder{unreadCount === 1 ? '' : 's'}</p></div><button onClick={() => setNotificationsOpen(false)} aria-label="Close notifications"><X size={15} /></button></div>
             <div className="max-h-64 overflow-y-auto">
-              {alerts.length ? alerts.slice(0, 5).map((product) => <button key={product.id} className="notification-item" onClick={() => { navigate('/expiring-soon'); setNotificationsOpen(false); }}><span className="notification-bullet" /><span className="min-w-0 flex-1 text-left"><span className="block truncate text-xs font-medium">{product.name}</span><span className="mt-1 block text-[10px] text-muted">Expires {getDaysLabel(daysUntil(product.expiryDate)).toLowerCase()}</span></span></button>) : <p className="px-4 py-6 text-center text-xs text-muted">All clear. Nothing expiring this week.</p>}
+              {alerts.length ? alerts.slice(0, 5).map((notification) => <button key={notification._id} className="notification-item" onClick={async () => {
+                try {
+                  if (!notification.readAt) await markNotificationRead(notification._id);
+                  navigate('/expiring-soon');
+                  setNotificationsOpen(false);
+                } catch (error) {
+                  toast.error(error.message);
+                }
+              }}><span className={`notification-bullet ${notification.readAt ? 'opacity-30' : ''}`} /><span className="min-w-0 flex-1 text-left"><span className="block truncate text-xs font-medium">{notification.productName}</span><span className="mt-1 block text-[10px] text-muted">{notification.message}</span></span></button>) : <p className="px-4 py-6 text-center text-xs text-muted">All clear. No in-app reminders yet.</p>}
             </div>
             <button className="w-full border-t border-white/[.08] py-3 text-xs font-medium text-lime hover:bg-white/[.03]" onClick={() => { navigate('/expiring-soon'); setNotificationsOpen(false); }}>View all reminders</button>
           </div>}

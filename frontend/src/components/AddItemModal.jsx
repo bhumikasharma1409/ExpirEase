@@ -53,6 +53,8 @@ export default function AddItemModal({ open, onClose, product, onSave }) {
       await onSave({ ...form, name: form.name.trim(), quantity: Number(form.quantity) });
       toast.success(product ? 'Item updated' : 'Item added to your inventory');
       onClose();
+    } catch (requestError) {
+      setError(requestError.message);
     } finally {
       setBusy(false);
     }

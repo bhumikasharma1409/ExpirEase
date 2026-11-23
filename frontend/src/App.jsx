@@ -10,7 +10,8 @@ import ExpiredItems from './pages/ExpiredItems';
 import Settings from './pages/Settings';
 
 function RequireAuth({ children }) {
-  const { user } = useInventory();
+  const { user, authLoading } = useInventory();
+  if (authLoading) return <div className="flex min-h-screen items-center justify-center bg-plum text-sm text-muted">Restoring your ExpirEase session…</div>;
   return user ? children : <Navigate to="/login" replace />;
 }
 

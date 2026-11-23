@@ -1,7 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Archive, BellRing, CircleHelp, LayoutDashboard, LogOut, Plus, Settings, ShieldCheck, X } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
-import { daysUntil } from '../utils/expiryUtils';
 
 const mainLinks = [
   { to: '/', label: 'Overview', icon: LayoutDashboard, end: true },
@@ -13,12 +12,11 @@ const watchLinks = [
 ];
 
 export default function Sidebar({ open, onClose, onAdd }) {
-  const { products, logout, profile, settings } = useInventory();
+  const { logout, profile, settings, dashboard } = useInventory();
   const navigate = useNavigate();
-  const urgent = (settings.reminders ? products : []).filter((item) => {
-    const days = daysUntil(item.expiryDate);
-    return days >= 0 && days <= 7;
-  }).length;
+  const urgent = settings.reminders
+    ? (dashboard?.statistics?.expiringToday || 0) + (dashboard?.statistics?.expiringSoon || 0)
+    : 0;
 
   return (
     <>

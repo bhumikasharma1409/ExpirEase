@@ -38,6 +38,14 @@ export function getExpiryStatus(expiryDate, today = new Date()) {
   return 'safe';
 }
 
+export function getProductDays(product) {
+  return Number.isInteger(product?.daysRemaining) ? product.daysRemaining : daysUntil(product?.expiryDate);
+}
+
+export function getProductStatus(product) {
+  return product?.expiryStatus || getExpiryStatus(product?.expiryDate);
+}
+
 export function formatDate(dateString, options = { month: 'short', day: 'numeric', year: 'numeric' }) {
   const date = parseDateOnly(dateString);
   if (!date) return '—';

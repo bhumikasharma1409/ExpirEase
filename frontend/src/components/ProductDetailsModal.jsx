@@ -1,10 +1,10 @@
 import { CalendarDays, Package2, X } from 'lucide-react';
-import { daysUntil, formatDate, getDaysLabel, getExpiryStatus } from '../utils/expiryUtils';
+import { formatDate, getDaysLabel, getProductDays, getProductStatus } from '../utils/expiryUtils';
 import ExpiryBadge from './ExpiryBadge';
 
 export default function ProductDetailsModal({ product, onClose, onEdit }) {
   if (!product) return null;
-  const days = daysUntil(product.expiryDate);
+  const days = getProductDays(product);
   return (
     <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section role="dialog" aria-modal="true" aria-labelledby="product-details-title" className="modal-panel max-w-lg">
@@ -14,7 +14,7 @@ export default function ProductDetailsModal({ product, onClose, onEdit }) {
           <span className="absolute bottom-4 left-5 text-xs font-medium uppercase tracking-[.18em] text-ivory/75">{product.category}</span>
         </div>
         <div className="p-6 sm:p-7">
-          <div className="flex items-start justify-between gap-3"><div><p className="eyebrow">PRODUCT DETAIL</p><h2 id="product-details-title" className="mt-2 font-display text-2xl font-semibold">{product.name}</h2></div><ExpiryBadge status={getExpiryStatus(product.expiryDate)} /></div>
+          <div className="flex items-start justify-between gap-3"><div><p className="eyebrow">PRODUCT DETAIL</p><h2 id="product-details-title" className="mt-2 font-display text-2xl font-semibold">{product.name}</h2></div><ExpiryBadge status={getProductStatus(product)} /></div>
           <div className="mt-6 grid grid-cols-2 gap-3">
             <Detail label="Quantity" value={`${product.quantity} ${product.unit}`} />
             <Detail label="Time left" value={getDaysLabel(days)} />
