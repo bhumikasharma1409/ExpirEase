@@ -15,7 +15,7 @@ const notificationSchema = new mongoose.Schema({
   productName: { type: String, required: true },
   category: { type: String, required: true },
   expiryDate: { type: Date, required: true },
-  daysBeforeExpiry: { type: Number, enum: [1, 3, 7], required: true },
+  daysBeforeExpiry: { type: Number, enum: [0, 1, 3, 7], required: true },
   channel: { type: String, enum: ['inApp', 'email'], required: true },
   status: { type: String, enum: ['pending', 'sent', 'failed'], required: true },
   message: { type: String, required: true },

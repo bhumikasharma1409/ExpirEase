@@ -82,7 +82,7 @@ export default function Settings() {
         </div>
         <div className="mt-3 border-t border-white/[.07] pt-4">
           <p className="text-xs font-medium text-ivory">Remind me before expiry</p>
-          <p className="mt-1 text-[11px] text-muted">The scheduled backend check runs daily at 09:00 in the configured reminder timezone.</p>
+          <p className="mt-1 text-[11px] text-muted">In-app reminders follow these intervals. Email reminders use 7, 3, 1, and 0 days before expiry and are checked daily at 09:00 Asia/Kolkata.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {REMINDER_DAYS.map((day) => {
               const active = preferences.reminderDays.includes(day);

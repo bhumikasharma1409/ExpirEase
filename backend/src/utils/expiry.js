@@ -1,4 +1,5 @@
 const DAY_MS = 24 * 60 * 60 * 1000;
+export const REMINDER_TIMEZONE = 'Asia/Kolkata';
 
 export function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -40,6 +41,43 @@ export function getDaysUntil(expiryDate, today = new Date()) {
   const expiry = parseDateOnly(expiryKey);
   const current = parseDateOnly(localDateKey(today));
   return Math.round((expiry.getTime() - current.getTime()) / DAY_MS);
+}
+
+export function dateKeyInTimezone(date = new Date(), timeZone = REMINDER_TIMEZONE) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+export function addDaysToDateKey(dateKey, days) {
+  const date = parseDateOnly(dateKey);
+  if (!date) return null;
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+export function getDaysUntilInTimezone(expiryDate, now = new Date(), timeZone = REMINDER_TIMEZONE) {
+  const expiryKey = dateKeyFromValue(expiryDate);
+  const currentKey = dateKeyInTimezone(now, timeZone);
+  if (!expiryKey) return null;
+  const expiry = parseDateOnly(expiryKey);
+  const current = parseDateOnly(currentKey);
+  return Math.round((expiry.getTime() - current.getTime()) / DAY_MS);
+}
+
+export function getDateBoundsInTimezone(now = new Date(), timeZone = REMINDER_TIMEZONE) {
+  const todayKey = dateKeyInTimezone(now, timeZone);
+  const today = parseDateOnly(todayKey);
+  return {
+    today,
+    eighthDay: new Date(today.getTime() + DAY_MS * 8),
+    todayKey,
+  };
 }
 
 export function getExpiryStatus(expiryDate, today = new Date()) {

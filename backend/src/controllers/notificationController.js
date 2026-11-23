@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Notification from '../models/Notification.js';
+import { isEmailConfigured } from '../services/reminderScheduler.js';
 
 export async function getNotifications(req, res, next) {
   try {
@@ -15,8 +16,7 @@ export async function getNotifications(req, res, next) {
       success: true,
       data: {
         notifications: notifications.map(({ failureReason: _failureReason, ...notification }) => notification),
-        emailConfigured: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER &&
-          process.env.SMTP_PASSWORD && process.env.SMTP_FROM),
+        emailConfigured: isEmailConfigured(),
       },
     });
   } catch (error) {
