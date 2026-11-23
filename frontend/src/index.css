@@ -150,10 +150,10 @@ input[readonly] { cursor: not-allowed; opacity: .65; }
 .product-art-shape { position: relative; display: flex; height: 53px; width: 53px; align-items: center; justify-content: center; border: 1px solid currentColor; border-radius: 17px; background: rgba(255,255,255,.055); box-shadow: 0 8px 22px rgba(0,0,0,.12); transition: transform .25s; }
 .product-card:hover .product-art-shape { transform: translateY(-2px) rotate(-4deg); }
 .product-actions { position: absolute; z-index: 5; top: 9px; right: 9px; }
-.product-actions summary { display: flex; height: 29px; width: 29px; align-items: center; justify-content: center; border: 1px solid rgba(245,240,231,.13); border-radius: 8px; background: rgba(33,24,43,.56); color: var(--ivory); list-style: none; cursor: pointer; opacity: .75; transition: .15s; }
-.product-actions summary::-webkit-details-marker { display: none; }
-.product-actions:hover summary, .product-actions[open] summary { opacity: 1; background: #21182b; }
-.product-action-menu { position: absolute; top: 34px; right: 0; z-index: 10; width: 130px; overflow: hidden; border: 1px solid rgba(245,240,231,.1); border-radius: 9px; background: #392a43; box-shadow: 0 10px 24px rgba(0,0,0,.3); }
+.product-actions > button { display: flex; height: 29px; width: 29px; align-items: center; justify-content: center; border: 1px solid rgba(245,240,231,.13); border-radius: 8px; background: rgba(33,24,43,.56); color: var(--ivory); cursor: pointer; opacity: .75; transition: .15s; }
+.product-actions:hover > button, .product-actions > button[aria-expanded="true"] { opacity: 1; background: #21182b; }
+.product-action-menu { position: fixed; z-index: 65; width: 130px; max-width: calc(100vw - 16px); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; border: 1px solid rgba(245,240,231,.1); border-radius: 9px; background: #392a43; box-shadow: 0 10px 24px rgba(0,0,0,.3); animation: product-menu-in .12s ease-out; }
+@keyframes product-menu-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
 .product-action-menu button { display: block; width: 100%; padding: 9px 11px; color: #e7deeb; font-size: 11px; text-align: left; }
 .product-action-menu button:hover { background: rgba(255,255,255,.06); }
 .product-thumb { display: flex; height: 42px; width: 42px; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 12px; }
@@ -161,7 +161,7 @@ input[readonly] { cursor: not-allowed; opacity: .65; }
 .product-list-row { position: relative; display: flex; min-height: 72px; align-items: center; gap: 13px; border-bottom: 1px solid rgba(245,240,231,.055); padding: 10px 16px; }
 .product-list-row:last-child { border-bottom: 0; }
 .product-list-row .product-actions { position: relative; top: auto; right: auto; }
-.product-list-row .product-actions summary { color: var(--muted); background: transparent; }
+.product-list-row .product-actions > button { color: var(--muted); background: transparent; }
 .empty-state { display: flex; min-height: 210px; flex-direction: column; align-items: center; justify-content: center; padding: 25px 12px; text-align: center; }
 .empty-illustration { display: flex; height: 54px; width: 54px; align-items: center; justify-content: center; border: 1px solid rgba(199,243,107,.19); border-radius: 17px; background: rgba(199,243,107,.07); color: var(--lime); transform: rotate(-5deg); }
 .attention-banner { display: flex; align-items: center; gap: 13px; border: 1px solid rgba(228,184,108,.17); border-radius: 13px; background: linear-gradient(90deg, rgba(228,184,108,.08), rgba(228,184,108,.02)); padding: 14px 16px; }
@@ -196,7 +196,7 @@ input[readonly] { cursor: not-allowed; opacity: .65; }
 .upload-field small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; font-weight: 400; }
 .product-detail-art { position: relative; display: flex; height: 160px; align-items: center; justify-content: center; overflow: hidden; }
 
-.auth-page { display: grid; min-height: 100vh; grid-template-columns: minmax(360px, 1fr) minmax(420px, .95fr); background: #21182B; }
+.auth-page { display: grid; min-height: 100vh; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); background: #21182B; }
 .auth-brand-panel { position: relative; display: flex; min-height: 100vh; flex-direction: column; overflow: hidden; background: radial-gradient(ellipse at 80% 45%, rgba(91,74,96,.2), transparent 45%), #2b2034; padding: 36px 8%; }
 .auth-brand-copy { position: relative; z-index: 2; margin: auto 0; padding: 54px 0 40px; }
 .auth-brand-copy h1 { margin-top: 20px; font-family: 'Manrope', sans-serif; font-size: clamp(46px, 6vw, 76px); font-weight: 600; letter-spacing: -.07em; line-height: .99; }

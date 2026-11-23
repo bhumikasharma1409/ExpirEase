@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CalendarDays, MoreHorizontal, Package2 } from 'lucide-react';
 import { formatDate, getDaysLabel, getProductDays, getProductStatus } from '../utils/expiryUtils';
 import ExpiryBadge from './ExpiryBadge';
@@ -57,14 +59,115 @@ export default function ProductCard({ product, onEdit, onDelete, onConsume, onDe
 }
 
 function ProductActions({ onEdit, onDelete, onConsume }) {
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState(null);
+
+  useLayoutEffect(() => {
+    if (!open) return undefined;
+
+    const updatePosition = () => {
+      const trigger = triggerRef.current;
+      const menu = menuRef.current;
+      if (!trigger || !menu) return;
+
+      const rect = trigger.getBoundingClientRect();
+      const viewport = window.visualViewport;
+      const viewportWidth = viewport?.width ?? window.innerWidth;
+      const viewportHeight = viewport?.height ?? window.innerHeight;
+      const viewportLeft = viewport?.offsetLeft ?? 0;
+      const viewportTop = viewport?.offsetTop ?? 0;
+      const edge = 8;
+      const gap = 6;
+      const menuRect = menu.getBoundingClientRect();
+      const menuHeight = menuRect.height;
+      const menuWidth = menuRect.width;
+      const belowSpace = viewportTop + viewportHeight - rect.bottom - edge - gap;
+      const aboveSpace = rect.top - viewportTop - edge - gap;
+      const openBelow = belowSpace >= menuHeight;
+      const availableHeight = Math.max(0, Math.min(menuHeight, openBelow ? belowSpace : aboveSpace));
+      const left = Math.max(
+        viewportLeft + edge,
+        Math.min(rect.right - menuWidth, viewportLeft + viewportWidth - menuWidth - edge),
+      );
+      const top = openBelow
+        ? rect.bottom + gap
+        : Math.max(viewportTop + edge, rect.top - gap - availableHeight);
+
+      setPosition({ left, top, maxHeight: availableHeight });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    window.visualViewport?.addEventListener('resize', updatePosition);
+    window.visualViewport?.addEventListener('scroll', updatePosition);
+
+    const onPointerDown = (event) => {
+      if (!triggerRef.current?.contains(event.target) && !menuRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+      window.visualViewport?.removeEventListener('resize', updatePosition);
+      window.visualViewport?.removeEventListener('scroll', updatePosition);
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  const runAction = (action) => {
+    setOpen(false);
+    action();
+  };
+
   return (
-    <details className="product-actions">
-      <summary aria-label="Product actions"><MoreHorizontal size={17} /></summary>
-      <div className="product-action-menu">
-        <button onClick={onEdit}>Edit item</button>
-        <button onClick={onConsume}>Mark consumed</button>
-        <button onClick={onDelete} className="text-coral">Delete item</button>
+    <>
+      <div className="product-actions">
+        <button
+          ref={triggerRef}
+          type="button"
+          aria-label="Product actions"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => {
+            setPosition(null);
+            setOpen((current) => !current);
+          }}
+        >
+          <MoreHorizontal size={17} />
+        </button>
       </div>
-    </details>
+      {open && createPortal(
+        <div
+          ref={menuRef}
+          className="product-action-menu"
+          role="menu"
+          style={{
+            left: position?.left ?? 0,
+            top: position?.top ?? 0,
+            maxHeight: position?.maxHeight ?? 'min(180px, calc(100dvh - 16px))',
+            visibility: position ? 'visible' : 'hidden',
+          }}
+        >
+          <button type="button" role="menuitem" onClick={() => runAction(onEdit)}>Edit item</button>
+          <button type="button" role="menuitem" onClick={() => runAction(onConsume)}>Mark consumed</button>
+          <button type="button" role="menuitem" onClick={() => runAction(onDelete)} className="text-coral">Delete item</button>
+        </div>,
+        document.body,
+      )}
+    </>
   );
 }
