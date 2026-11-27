@@ -25,9 +25,18 @@ export default function Navbar({ onMenu, onAdd }) {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  useEffect(() => {
+    const query = new URLSearchParams(location.search).get('search');
+    setSearch(query || '');
+  }, [location.search]);
+
   const submitSearch = (event) => {
     event.preventDefault();
     navigate(`/inventory${search ? `?search=${encodeURIComponent(search)}` : ''}`);
+  };
+  const openMobileSearch = () => {
+    navigate('/inventory');
+    window.setTimeout(() => document.querySelector('[aria-label="Search products"]')?.focus(), 100);
   };
   const toggleNotifications = async () => {
     const opening = !notificationsOpen;
@@ -51,7 +60,7 @@ export default function Navbar({ onMenu, onAdd }) {
         <form onSubmit={submitSearch} className="ml-1 hidden min-w-0 md:block"><SearchBar value={search} onChange={setSearch} className="top-search" /></form>
       </div>
       <div className="flex items-center gap-2 sm:gap-3">
-        <button className="icon-button md:hidden" onClick={() => navigate('/inventory')} aria-label="Search inventory"><Search size={18} /></button>
+        <button className="icon-button md:hidden" onClick={openMobileSearch} aria-label="Search inventory"><Search size={18} /></button>
         <div className="relative">
           <button className={`icon-button relative ${notificationsOpen ? 'icon-button-active' : ''}`} onClick={toggleNotifications} aria-label="Notifications">
             <Bell size={18} />

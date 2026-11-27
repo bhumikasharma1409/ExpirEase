@@ -159,7 +159,13 @@ export async function getProducts(req, res, next) {
   if (search !== undefined) {
     if (typeof search !== 'string' || search.length > 100) return res.status(400).json({ success: false, message: 'Search must be 100 characters or fewer.' });
     const escapedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    if (escapedSearch) filter.productName = { $regex: escapedSearch, $options: 'i' };
+    if (escapedSearch) {
+      filter.$or = [
+        { productName: { $regex: escapedSearch, $options: 'i' } },
+        { category: { $regex: escapedSearch, $options: 'i' } },
+        { notes: { $regex: escapedSearch, $options: 'i' } },
+      ];
+    }
   }
 
   const requestedStatus = req.query.status === undefined ? undefined : statusAliases[req.query.status] || req.query.status;
